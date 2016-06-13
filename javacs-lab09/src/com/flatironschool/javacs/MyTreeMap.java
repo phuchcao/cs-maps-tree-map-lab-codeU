@@ -44,7 +44,7 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 			this.value = value;
 		}
 	}
-		
+
 	@Override
 	public void clear() {
 		size = 0;
@@ -64,8 +64,8 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	private Node findNode(Object target) {
 		// some implementations can handle null as a key, but not this one
 		if (target == null) {
-            throw new NullPointerException();
-	    }
+			throw new NullPointerException();
+		}
 		
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
@@ -73,7 +73,19 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		
 		// the actual search
         // TODO: Fill this in.
-        return null;
+        //int cmp = k.compareTo(p.key);
+		Node node = root;
+		while (node != null){
+			int cmp = k.compareTo(node.key);
+			if (cmp < 0){
+				node = node.left;
+			} else if (cmp > 0){
+				node = node.right;
+			} else {
+				return node;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -92,6 +104,20 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		return containsValueHelper(target, root);
+	}
+
+	private boolean containsValueHelper(Object target, Node node){
+		if (node == null) return false;
+		if (equals(target, node.value)){
+			return true;
+		} 
+		if (containsValueHelper(target, node.left)){
+			return true;
+		}
+		if (containsValueHelper(target, node.right)){
+			return true;
+		}
 		return false;
 	}
 
@@ -118,7 +144,15 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
         // TODO: Fill this in.
+		helperKeySet(set, root);
 		return set;
+	}
+
+	private void helperKeySet(Set<K> set, Node node){
+		if (node == null) return;
+		helperKeySet(set, node.left);
+		set.add(node.key);
+		helperKeySet(set, node.right);
 	}
 
 	@Override
@@ -135,8 +169,31 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
-        return null;
+		@SuppressWarnings("unchecked")
+		Comparable<? super K> k = (Comparable<? super K>) key;
+		int cmp = k.compareTo(node.key);
+
+		if (cmp < 0){
+			if (node.left != null){
+				return putHelper(node.left, key, value);
+			} else {
+				node.left = new Node(key, value);
+				size++;
+				return null;
+			}
+		} else if (cmp > 0){
+			if (node.right != null){
+				return putHelper(node.right, key, value);
+			} else {
+				node.right = new Node(key, value);
+				size++;
+				return null;
+			}
+		} else {
+			V oldVal = node.value;
+			node.value = value;
+			return oldVal;
+		}
 	}
 
 	@Override
